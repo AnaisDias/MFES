@@ -1,0 +1,178 @@
+class Airplane
+types
+	public Point :: x:nat
+							y:nat;
+	public Orientation = <N>|<NW>|<W>|<SW>|<S>|<SE>|<E>|<NE>;
+	public String :: seq of char;
+values
+-- TODO Define values here
+instance variables
+	private idPlane : nat;
+	private position : Point;
+	private orientation : Orientation;
+	private speed : nat;
+	private height : nat;
+	private goal : Point;
+	private outOfReach : bool;
+	private landed : bool;
+	
+operations
+	public Airplane: nat * nat * nat * Orientation * nat ==> Airplane
+	Airplane(id,x,y,ori,s) == 
+	(
+		height := 0;
+		position := mk_Point(x,y);
+		speed := s;
+		orientation := ori;
+		idPlane := id;
+		return self;
+	)
+	pre x >= 0 and x <= 40 and y >= 0 and y <= 40 and s > 0 and s < 5;
+	
+	public SetSpeed: nat1 ==> ()
+	SetSpeed(newSpeed) ==
+	(
+		speed := newSpeed;
+	);
+	
+	public GetSpeed: () ==> nat1 
+	GetSpeed() ==
+	(
+		return speed;
+	)
+	post speed = speed~; 
+	
+	public GetHeight: () ==>nat1
+	GetHeight() ==
+	(
+		return height;
+	)
+	post height = height~; 
+	
+	public SetHeight: nat ==> ()
+	SetHeight(num) ==
+	(
+		height := num;
+	) 
+	pre height >= num - 1000 or height <= num - 1000;
+	
+	public setGoal: nat * nat ==> ()
+	setGoal(x,y) ==
+	(
+			goal := mk_Point(x,y);
+	)
+	pre x >= 0 and x <= 40 and y >= 0 and y <= 40;
+	
+	public getGoal: () ==> Point
+	getGoal() ==
+	(
+		return goal;
+	)
+	post goal = goal~;
+	
+	public getOrientation: () ==> Orientation
+	getOrientation() ==
+	(
+		return orientation;
+	)
+	post orientation = orientation~;
+	
+	public getLanded: () ==> bool
+	getLanded() ==
+	(
+		return landed;
+	)
+	post landed = landed~;
+	
+	public getOutOfReach: () ==> bool
+	getOutOfReach() ==
+	(
+		return outOfReach;
+	)
+	post outOfReach = outOfReach~;
+	
+	private getAngle: () ==> nat
+	getAngle() ==
+	(
+		if(orientation = <N>) then return 0
+		else if(orientation = <NE>) then return 45
+		else if(orientation = <E>) then return 90
+		else if(orientation = <SE>) then return 135
+		else if(orientation = <S>) then return 180
+		else if(orientation = <SW>) then return 225
+		else if(orientation = <W>) then return 270
+		else return 315;
+	
+	);
+	
+	private convertAngle: nat ==> Orientation
+	convertAngle(ang) ==
+	(
+		if(ang = -45) then return <NW>
+		else if(ang = 0) then return <N>
+		else if(ang = 45) then return <NE>
+		else if(ang = 90) then return <E>
+		else if(ang = 135) then return <SE>
+		else if(ang = 180) then return <S>
+		else if(ang = 225) then return <SW>
+		else if(ang = 270) then return <W>
+		else if(ang = 315) then return <NW>
+		else return <N>;
+	
+	);
+	-- if n == 1 add 45 degrees, if n == -1 subtract 45 degrees
+	public setOrientation: nat ==> ()
+	setOrientation(n) ==
+	(
+		if( n = 1 ) then orientation := convertAngle(getAngle()+45)
+		else if (n = -1) then orientation := convertAngle(getAngle()-45);
+	)
+	pre n = 1 or n = -1;
+	
+	public move: () ==> ()
+	move() ==
+	(
+		
+		if (orientation = <N>) then
+			(
+				position.y := position.y + speed;
+			)
+			else if (orientation = <NE>) then
+			(
+				position.y := position.y + speed;
+				position.x := position.x + speed;
+			)
+			else if (orientation = <E>) then
+			(
+				position.x := position.x + speed;
+			)
+			else if (orientation = <SE>) then
+			(
+				position.y := position.y - speed;
+				position.x := position.x + speed;
+			)
+			else if (orientation = <S>) then
+			(
+				position.y := position.y - speed;
+			)
+			else if (orientation = <SW>) then
+			(
+				position.y := position.y - speed;
+				position.x := position.x - speed;
+			)
+			else if (orientation = <W>) then
+			(
+				position.x := position.x - speed;
+			)
+			else (
+				position.y := position.y + speed;
+				position.x := position.x - speed;
+			)
+		
+	);
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end Airplane

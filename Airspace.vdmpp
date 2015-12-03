@@ -1,0 +1,15 @@
+class Airspace
+types
+ public point :: x:nat
+ 							y:nat;
+values
+-- TODO Define values here
+instance variables
+  public grid : set of point;
+operations
+-- TODO Define operations here
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end Airspace
