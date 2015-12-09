@@ -1,13 +1,22 @@
 class ATC
 types
--- TODO Define types here
+public Point :: x:nat
+								y:nat;
+public Orientation = <N>|<NW>|<W>|<SW>|<S>|<SE>|<E>|<NE>;
 values
 -- TODO Define values here
 instance variables
-	public Airplanes: set of Airplane;
-	public Airspace: Grid := new Grid();
+	public airplanes: seq of Airplane := [];
+	public runway: Runway;
+	public beacons: seq of Point := [];
 operations
--- TODO Define operations here
+
+	public addAirplane: Airplane ==> ()
+	addAirplane(Airplane) ==
+	(
+		return;
+	);
+	
 functions
 -- TODO Define functiones here
 traces

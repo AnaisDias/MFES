@@ -1,15 +1,17 @@
-class Airspace
+class Runway
 types
- public point :: x:nat
- 							y:nat;
+	public Point :: x:nat
+							y:nat;
+	public Orientation = <N>|<NW>|<W>|<SW>|<S>|<SE>|<E>|<NE>;
 values
 -- TODO Define values here
 instance variables
-  public grid : set of point;
+	private position : Point;
+	private orientation : Orientation;
 operations
 -- TODO Define operations here
 functions
 -- TODO Define functiones here
 traces
 -- TODO Define Combinatorial Test Traces here
-end Airspace
+end Runway
