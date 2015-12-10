@@ -1,6 +1,7 @@
 class TestAirplane
 types
--- TODO Define types here
+		public Point :: x:int
+									y:int;
 values
 -- TODO Define values here
 instance variables
@@ -12,16 +13,63 @@ operations
 	(
 		return self;
 	);
-	public testMove: () ==> int
-	testMove() ==
+	
+	private assertTrue: bool ==> ()
+  assertTrue(cond) == return
+  pre cond;
+                
+	public testRotate: () ==> ()
+	testRotate() ==
 	(
+		dcl p : Airplane := new Airplane(0,7,19,<S>,1,20,0);
 		returnInt := p.move();
-		p.setTargetOrientation(-90);
+		p.setTargetRotation(90);
 		returnInt := p.move();
 		returnInt := p.move();	
-		return returnInt;	
+		assertTrue(p.getOrientation() = <E>);
+		p.setTargetRotation(-180);
+		returnInt := p.move();	
+		returnInt := p.move();	
+		returnInt := p.move();	
+		returnInt := p.move();	
+		assertTrue(p.getOrientation() = <W>);
 	);
 	
+	public testFailed: () ==> ()
+	testFailed() ==
+	(
+		dcl p : Airplane := new Airplane(0,7,19,<S>,1,20,0);
+		p.setTargetRotation(180);
+		returnInt := p.move();
+		returnInt := p.move();
+		returnInt := p.move();
+		returnInt := p.move();
+		assertTrue(returnInt = 4);
+	);
+	
+	public testSecGoal: () ==> ()
+	testSecGoal() ==
+	(
+		dcl p : Airplane := new Airplane(0,7,19,<S>,1,20,0);
+		p.setSecGoal(3,19);
+		returnInt := p.move();
+		returnInt := p.move();
+		returnInt := p.move();
+		returnInt := p.move();
+		assertTrue(returnInt = 3);
+	);
+	
+	public testOutOfReach: () ==> ()
+	testOutOfReach() ==
+	(
+		dcl p : Airplane := new Airplane(0,16,19,<S>,1,20,0);
+		p.setTargetRotation(90);
+		returnInt := p.move();
+		returnInt := p.move();
+		returnInt := p.move();
+		returnInt := p.move();
+		assertTrue(returnInt = 1);
+	);
 	
 functions
 -- TODO Define functiones here
