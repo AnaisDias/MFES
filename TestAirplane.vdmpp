@@ -1,0 +1,30 @@
+class TestAirplane
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+	public p : Airplane := new Airplane(0,5,5,<N>,1,20,0);
+	public returnInt : int := 0;
+operations
+	public TestAirplane: () ==> TestAirplane
+	TestAirplane () ==
+	(
+		return self;
+	);
+	public testMove: () ==> int
+	testMove() ==
+	(
+		returnInt := p.move();
+		p.setTargetOrientation(-90);
+		returnInt := p.move();
+		returnInt := p.move();	
+		return returnInt;	
+	);
+	
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end TestAirplane

@@ -10,21 +10,28 @@ instance variables
 	private idPlane : nat; -- id of this plane
 	private position : Point; -- Current position of the plane
 	private orientation : Orientation; -- Current orientation of the plane 
-	private targetOrientation : int := 0;
+	private targetRotation : int := 0;
 	private curPos : real := 0; -- 0 to 1. This is incremented by the speed each clock tick
 	private speed : real; -- 0.1 to 1.0 . Speed of the plane.
 	private goal : Point; -- Current primary goal of the plane.
-	private secGoal : Point := mk_Point(-1,-1); -- Current secGoal of the plane, usually a beacon. 
+	private secGoal : Point := mk_Point(-1,-1); -- Current secGoal of the plane or a beacon. 
 	private outOfReach : bool := false; -- When the plane leaves the map if it is the goal
 	private landed : bool := false;	-- Plane landed in the runway or not
 
 -- Variables that will change during the code;
 	
+-- Help variable for the orientation change
+
+	public orientations : map Orientation to int := {<N> |-> 0, <NW> |-> 45,
+																									<W> |-> 90, <SW> |-> 135,
+																									<S> |-> 180, <SE> |-> 225,
+																									<E> |-> 270, <NE> |-> 315};
 -- Return variables for move
 	public MOVE_SUCCESS: int := 0;
 	public REACHED_GOAL : int := 1;
 	public LANDED : int := 2;
-	public LOST : int := 3;
+	public BEACON : int := 3;
+	public LOST : int := 4;
 		
 operations
 
@@ -132,74 +139,182 @@ operations
 	private getAngle: () ==> nat
 	getAngle() ==
 	(
-		if(orientation = <N>) then return 0
-		else if(orientation = <NE>) then return 45
-		else if(orientation = <E>) then return 90
-		else if(orientation = <SE>) then return 135
-		else if(orientation = <S>) then return 180
-		else if(orientation = <SW>) then return 225
-		else if(orientation = <W>) then return 270
-		else return 315;
-	
+		return orientations(orientation);
 	);
 	
 	--Convert angle  to Orientation
 	private convertAngle: int ==> Orientation
 	convertAngle(ang) ==
 	(
-		if(ang = -45) then return <NW>
+		if(ang = -45) then return <NE>
 		else if(ang = 0) then return <N>
-		else if(ang = 45) then return <NE>
-		else if(ang = 90) then return <E>
-		else if(ang = 135) then return <SE>
+		else if(ang = 45) then return <NW>
+		else if(ang = 90) then return <W>
+		else if(ang = 135) then return <SW>
 		else if(ang = 180) then return <S>
-		else if(ang = 225) then return <SW>
-		else if(ang = 270) then return <W>
-		else if(ang = 315) then return <NW>
+		else if(ang = 225) then return <SE>
+		else if(ang = 270) then return <E>
+		else if(ang = 315) then return <NE>
 		else return <N>;
 	
 	);
 	
-	-- Sets the target orientation of the plane
-	public setTargetOrientation: int ==> ()
-	setTargetOrientation (ori) ==
+	-- Sets the target rotation of the plane
+	public setTargetRotation: int ==> ()
+	setTargetRotation (ori) ==
 	(
-		targetOrientation := ori;
-	);
+		goal := mk_Point(-1,-1);
+		targetRotation := ori;
+	)
+	post goal.x = -1 and goal.y = -1;
 	
 	-- rotates the plane acording to the target orientation
 	private setOrientation: () ==> ()
 	setOrientation() ==
 	(
-		if( targetOrientation > 0) then
+		
+		if( targetRotation > 0) then
 		(
 		 orientation := convertAngle(getAngle()+45);
-		 targetOrientation := targetOrientation - 45;
+		 targetRotation := targetRotation - 45;
 		)
-		else if (targetOrientation < 0) then 
+		else if (targetRotation < 0) then 
 		(
 			orientation := convertAngle(getAngle()-45);
-			targetOrientation := targetOrientation + 45;
+			targetRotation := targetRotation + 45;
 		)
-	)
-	post targetOrientation >= (targetOrientation~ - 45) or targetOrientation <= (targetOrientation~ + 45);
-	
-	-- function to calculate movement of the plane when there is a secGoal
-	public calcMovement: () ==> ()
-	calcMovement () ==
-	(
-		return;
 	);
 	
-	-- function to move the plane
-	public move: () ==> int
-	move() ==
+	-- function used in move to calculate which orientation must the plane have to reach the goal
+	private calcOrientation: () ==> ()
+	calcOrientation () ==
 	(
-		-- Missing secGoal part.......
-		if(secGoal.x = -1) then
+		if(secGoal.x < position.x) then
 		(
-			setOrientation();
-			if (orientation = <N>) then
+			if(secGoal.y < position.y) then	( -- SW --
+				if( ((getAngle()- orientations(<SW>) ) <= 180 and
+						(getAngle()- orientations(<SW>))  > 0)
+						or (getAngle()- orientations(<SW>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<SW>) ) >- 180 and
+						(getAngle()- orientations(<SW>))  < 0) 
+						or (getAngle()- orientations(<SW>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			)
+			else if(secGoal.y > position.y) then ( -- NW --
+				if( ((getAngle()- orientations(<NW>) ) <= 180 and
+						(getAngle()- orientations(<NW>))  > 0)
+						or (getAngle()- orientations(<NW>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<NW>) ) >- 180 and
+						(getAngle()- orientations(<NW>))  < 0) 
+						or (getAngle()- orientations(<NW>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			)
+			else ( -- W --
+				if( ((getAngle()- orientations(<W>) ) <= 180 and
+						(getAngle()- orientations(<W>))  > 0)
+						or (getAngle()- orientations(<W>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<W>) ) >- 180 and
+						(getAngle()- orientations(<W>))  < 0) 
+						or (getAngle()- orientations(<W>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			);
+		)
+		else if(secGoal.x > position.x) then
+		(
+			if(secGoal.y < position.y) then	( -- SE --
+				if( ((getAngle()- orientations(<SE>) ) <= 180 and
+						(getAngle()- orientations(<SE>))  > 0)
+						or (getAngle()- orientations(<SE>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<SE>) ) >- 180 and
+						(getAngle()- orientations(<SE>))  < 0) 
+						or (getAngle()- orientations(<SE>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			)
+			else if(secGoal.y > position.y) then ( -- NE --
+				if( ((getAngle()- orientations(<NE>) ) <= 180 and
+						(getAngle()- orientations(<NE>))  > 0)
+						or (getAngle()- orientations(<NE>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<NE>) ) >- 180 and
+						(getAngle()- orientations(<NE>))  < 0) 
+						or (getAngle()- orientations(<NE>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			)
+			else ( -- E --
+				if( ((getAngle()- orientations(<E>) ) <= 180 and
+						(getAngle()- orientations(<E>))  > 0)
+						or (getAngle()- orientations(<E>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<E>) ) >- 180 and
+						(getAngle()- orientations(<E>))  < 0) 
+						or (getAngle()- orientations(<E>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			)
+		)
+		else ( -- S --
+			if(secGoal.y < position.y) then	(
+				if( ((getAngle()- orientations(<S>) ) <= 180 and
+						(getAngle()- orientations(<S>))  > 0)
+						or (getAngle()- orientations(<S>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<S>) ) >- 180 and
+						(getAngle()- orientations(<S>))  < 0) 
+						or (getAngle()- orientations(<S>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			) -- N --
+			else if(secGoal.y > position.y) then(
+				if( ((getAngle()- orientations(<N>) ) <= 180 and
+						(getAngle()- orientations(<N>))  > 0)
+						or (getAngle()- orientations(<N>)) <= - 180) then
+				(
+					orientation := convertAngle(getAngle()-45);
+				)
+				else if( ((getAngle()- orientations(<N>) ) >- 180 and
+						(getAngle()- orientations(<N>))  < 0) 
+						or (getAngle()- orientations(<N>)) > 180) then
+				(
+					orientation := convertAngle(getAngle()+45);
+				)
+			)
+		);
+	);
+	-- function to calculate movement of the plane when there is a secGoal
+	private calcMovement: () ==> int
+	calcMovement () ==
+	(
+		if (orientation = <N>) then
 				(
 					curPos:= curPos + speed;
 					if(curPos >= 1.0) then 
@@ -410,8 +525,248 @@ operations
 						);
 					);
 				);
-			);
+				
 			return MOVE_SUCCESS;
+	);
+	
+	private calcMovementSec: () ==> int
+	calcMovementSec () ==
+	(
+		if (orientation = <N>) then
+				(
+					curPos:= curPos + speed;
+					if(curPos >= 1.0) then 
+					(
+						curPos := curPos - 1.0;
+						position.y := position.y + 1;
+						
+						-- If objective is <N> which is goal(0,20)
+						if( position.y > 19 and goal.x = 0 and goal.y = 20) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <N>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.y > 19) then (
+							return LOST;
+						);
+					);
+				)
+				else if (orientation = <NE>) then
+				(
+					
+					curPos := curPos + speed;
+					if( curPos >= 1.0 ) then
+					(
+						curPos := curPos - 1;
+						position.y := position.y + 1;
+						position.x := position.x + 1;
+						
+						-- If objective is <N> which is goal(0,20) or <E> which is goal(20,0)
+						if( (position.y > 19 and goal.x = 0 and goal.y = 20) 
+								or (position.x > 19 and goal.x = 20 and goal.y = 0)) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <NE>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.y > 19 or position.x > 19) then (
+							return LOST;
+						);
+					);
+				)
+				else if (orientation = <E>) then
+				(
+				
+					curPos:= curPos + speed;
+					if(curPos >= 1.0) then 
+					(
+						curPos := curPos - 1.0;
+						position.x := position.x + 1;
+						
+						-- If objective is <E> which is goal(20,0)
+						if( position.x > 19 and goal.x = 20 and goal.y = 0) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <E>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.x > 19) then (
+							return LOST;
+						);
+					);
+				)
+				else if (orientation = <SE>) then
+				(
+					
+					curPos := curPos + speed;
+					if( curPos >= 1.0 ) then
+					(
+						curPos := curPos - 1;
+						position.y := position.y - 1;
+						position.x := position.x + 1;
+						
+						-- If objective is <S> which is goal(0,-20) or <E> which is goal(20,0)
+						if( (position.y < 0 and goal.x = 0 and goal.y = -20) 
+								or (position.x > 19 and goal.x = 20 and goal.y = 0)) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <SE>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.y < 0 or position.x > 19) then (
+							return LOST;
+						);
+					);
+				)
+				else if (orientation = <S>) then
+				(
+					
+					curPos:= curPos + speed;
+					if(curPos >= 1.0) then 
+					(
+						curPos := curPos - 1.0;
+						position.y := position.y - 1;
+						
+						-- If objective is <S> which is goal(0,-20)
+						if( position.y < 0 and goal.x = 0 and goal.y = -20) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <S>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.y < 0) then (
+							return LOST;
+						);
+					);
+				)
+				else if (orientation = <SW>) then
+				(
+										
+					curPos := curPos + speed;
+					if( curPos >= 1.0 ) then
+					(
+						curPos := curPos - 1;
+						position.y := position.y - 1;
+						position.x := position.x - 1;
+						
+						-- If objective is <S> which is goal(0,-20) or <W> which is goal(-20,0)
+						if( (position.y < 0 and goal.x = 0 and goal.y = -20) 
+								or (position.x < 0 and goal.x = -20 and goal.y = 0)) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <SW>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.y < 0 or position.x < 0) then (
+							return LOST;
+						);
+					);
+				)
+				else if (orientation = <W>) then
+				(
+					--position.x := position.x - speed;
+					
+					curPos:= curPos + speed;
+					if(curPos >= 1.0) then 
+					(
+						curPos := curPos - 1.0;
+						position.x := position.x - 1;
+						
+						-- If objective is <W> which is goal(-20,0)
+						if( position.x < 0 and goal.x = -20 and goal.y = 0) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <W>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.x < 0) then (
+							return LOST;
+						);
+					);
+				)
+				else (
+					
+					curPos := curPos + speed;
+					if( curPos >= 1.0 ) then
+					(
+						curPos := curPos - 1;
+						position.y := position.y + 1;
+						position.x := position.x - 1;
+						
+						-- If objective is <N> which is goal(0,20) or <W> which is goal(-20,0)
+						if( (position.y > 19 and goal.x = 0 and goal.y = 20) 
+								or (position.x < 0 and goal.x = -20 and goal.y = 0)) then 
+						(
+							outOfReach := true;
+							return REACHED_GOAL;
+						)
+						-- BEACON <NW>
+						else if (position.x = secGoal.x and position.y = secGoal.y) then
+						(
+							secGoal := mk_Point(-1,-1);
+							return BEACON;
+						)
+						else if (position.y > 19 or position.x < 0) then (
+							return LOST;
+						);
+					);
+				);
+				
+			return MOVE_SUCCESS;
+	);
+	
+	-- function to move the plane
+	public move: () ==> int
+	move() ==
+	(
+		-- Missing secGoal part.......
+		if(secGoal.x = -1 or secGoal.y = -1) then
+		(
+			setOrientation();
+			return calcMovement();
+		)
+			-- secGoal exists
+		else
+		(
+			calcOrientation();
+			return calcMovementSec();
+		);
 	);
 	
 functions
