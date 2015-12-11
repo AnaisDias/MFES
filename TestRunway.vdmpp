@@ -30,6 +30,7 @@ operations
   	assertTrue(len r.getPlanes() = 1);
   	r.addPlane(p2);
   	assertTrue(len r.getPlanes() = 2);
+  	IO`println("Function testAddPlaneSuccess() success!");
   );
   
   public testRemovePlane: () ==> ()
@@ -42,6 +43,7 @@ operations
   	assertTrue(len r.getPlanes() = 1);
   	r.removePlane(p1);
   	assertTrue(len r.getPlanes() = 0);
+  	IO`println("Function testRemovePlane() success!");
   );  
   
   -- Should fail duplicate

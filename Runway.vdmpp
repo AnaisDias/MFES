@@ -31,6 +31,12 @@ operations
 		orientation := ori;
 	);
 	
+	--Gets position
+	public getPos: () ==> Point
+	getPos() ==
+	(
+		return position;
+	);
 	--Gets the orientation of the runway
 	public getOrientation: () ==> Orientation
 	getOrientation() ==

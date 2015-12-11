@@ -42,8 +42,7 @@ operations
 		returnInt := p.move();	
 		assertTrue(returnInt = 0);
 		assertTrue(p.getOrientation() = <W>);
-		IO`print("Orientation is ");
-		IO`print(p.getOrientation());
+		IO`println("Function testRotate() success!");
 	);
 	
 	public testFailed: () ==> ()
@@ -59,6 +58,7 @@ operations
 		assertTrue(returnInt = 0);
 		returnInt := p.move();
 		assertTrue(returnInt = 4);
+		IO`println("Function testFailed() success!");
 	);
 	
 	public testSecGoal: () ==> ()
@@ -74,6 +74,7 @@ operations
 		assertTrue(returnInt = 0);
 		returnInt := p.move();
 		assertTrue(returnInt = 3);
+		IO`println("Function testSecGoal() success!");
 	);
 	
 	public testOutOfReach: () ==> ()
@@ -90,6 +91,7 @@ operations
 		returnInt := p.move();
 		assertTrue(returnInt = 1);
 		assertTrue(p.getOutOfReach());
+		IO`println("Function testOutOfReach() success!");
 	);
 	
 	public testAll: () ==> ()
@@ -99,7 +101,7 @@ operations
 		testFailed();
 		testSecGoal();
 		testOutOfReach();
-	
+		IO`println("Function testAll() success!");	
 	);
 functions
 -- TODO Define functiones here

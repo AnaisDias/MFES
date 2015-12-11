@@ -28,13 +28,31 @@ operations
 		colisions := {|->};
 	);
 	
+	
+	-- Gets all planes
+	public getPlanes: () ==> seq of Airplane
+	getPlanes() ==
+	(
+		return airplanes;
+	)
+	post airplanes = airplanes~;
+	
 	-- Adds an airplane
 	public addPlane: Airplane ==> ()
 	addPlane(p) ==
 	(
-		airplanes := [p] ^ airplanes;
+		IO`print("Trying to add a plane\n");
+		IO`println(len airplanes + 1);
+		IO`println(p.getPos().x);
+		IO`println(p.getPos().y);
+		IO`println(p.getOrientation());
+		IO`println(p.getSpeed());
+		IO`println(p.getGoal().x);
+		IO`println(p.getGoal().y);
+		(dcl pNew : Airplane := new Airplane((len airplanes + 1), p.getPos().x , p.getPos().y , p.getOrientation(), p.getSpeed(), p.getGoal().x, p.getGoal().y);
+		airplanes := [pNew] ^ airplanes;)
 	)
-	post [p] ^airplanes~ = airplanes;
+	post len airplanes = len airplanes~ +1;
 	
 	-- Get plane by id
 	public getPlaneByID: nat ==> Airplane
@@ -87,36 +105,44 @@ operations
 	);
 	 
 	-- Orders a plane to rotate clockwise
-	public orderRotateCW: Airplane * int ==> ()
-	orderRotateCW(p,r) ==
+	public orderRotateCW: nat * int ==> ()
+	orderRotateCW(id,r) ==
 	(
-			p.setTargetRotation(-r);
+		for p in airplanes do
+				if( p.getID() = id) then
+					p.setTargetRotation(-r);
 	) 
-	pre (r rem 45) = 0 or r = 0;
+	pre ((r rem 45) = 0 or r = 0 ) and id in set inds airplanes;
 	
 	-- Orders a plane to rotate counterclockwise
-	public orderRotateCCW: Airplane * int ==> ()
-	orderRotateCCW(p,r) ==
+	public orderRotateCCW: nat * int ==> ()
+	orderRotateCCW(id,r) ==
 	(
-			p.setTargetRotation(r);
+		for p in airplanes do
+				if( p.getID() = id) then
+					p.setTargetRotation(r);
 	)
-	pre (r rem 45) = 0 or r = 0;
+	pre ((r rem 45) = 0 or r = 0 ) and id in set inds airplanes;
 	
 	-- Speed a plane up or down
-	public orderSpeed: Airplane * real ==> ()
-	orderSpeed(p,s) ==
+	public orderSpeed: nat * real ==> ()
+	orderSpeed(id,s) ==
 	(
-		p.setTargetSpeed(s);
+		for p in airplanes do
+				if( p.getID() = id) then
+					p.setTargetSpeed(s);
 	)
-	pre s > 0 and s <= 1.0;
+	pre s > 0 and s <= 1.0 and id in set inds airplanes;
 	
 	-- Order a plane to go to a beacon
-	public orderSecGoal: Airplane * Point ==> ()
-	orderSecGoal(p,beacon) ==
+	public orderSecGoal: nat * Point ==> ()
+	orderSecGoal(id,beacon) ==
 	(
-		p.setSecGoal(beacon.x, beacon.y);
+		for p in airplanes do
+			if( p.getID() = id) then
+				p.setSecGoal(beacon.x, beacon.y);
 	)
-	pre beacon in set elems beacons;
+	pre beacon in set elems beacons and id in set inds airplanes;
 	
 	--Checks which planes are next to each other
 	public checkWarning: () ==> ()
@@ -179,7 +205,8 @@ operations
 				);
 			);
 		);
-	);
+	)
+	post colisions = {|->};
 	
 	-- Land plane
 	public landPlane: Airplane ==> ()
@@ -200,8 +227,11 @@ operations
 				n := p.move();
 				if( n = 1) then
 				(
-					landPlane(p);
-					p.setLanded();
+					if(p.getGoal().x = runway.getPos().x and p.getGoal().y = runway.getPos().y and p.getOrientation() = runway.getOrientation()) then
+					(
+						landPlane(p);
+						p.setLanded();
+					);
 				)
 				else if( n = 4 ) then
 					return n;
