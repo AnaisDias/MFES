@@ -1,0 +1,70 @@
+class TestRunway
+types
+
+		public Point :: x:int
+									y:int;
+values
+-- TODO Define values here
+instance variables
+	public returnInt : int := 0;
+operations
+	public TestRunway: () ==> TestRunway
+	TestRunway () ==
+	(
+		return self;
+	);
+	
+	private assertTrue: bool ==> ()
+  assertTrue(cond) == return
+  pre cond;
+  
+  
+  public testAddPlaneSuccess: () ==> ()
+  testAddPlaneSuccess() ==
+  (
+  	dcl r: Runway := new Runway(5,5,<N>,5);
+  	dcl p1: Airplane := new Airplane(0,5,5,<N>,1,5,5);
+  	dcl p2: Airplane := new Airplane(1,5,5,<N>,1,5,5);
+  	assertTrue(len r.getPlanes() = 0);
+  	r.addPlane(p1);
+  	assertTrue(len r.getPlanes() = 1);
+  	r.addPlane(p2);
+  	assertTrue(len r.getPlanes() = 2);
+  );
+  
+  public testRemovePlane: () ==> ()
+  testRemovePlane() ==
+  (
+  	dcl r: Runway := new Runway(5,5,<N>,5);
+  	dcl p1: Airplane := new Airplane(0,5,5,<N>,1,5,5);
+  	assertTrue(len r.getPlanes() = 0);
+  	r.addPlane(p1);
+  	assertTrue(len r.getPlanes() = 1);
+  	r.removePlane(p1);
+  	assertTrue(len r.getPlanes() = 0);
+  );  
+  
+  -- Should fail duplicate
+  public testAddPlaneFailed: () ==> ()
+  testAddPlaneFailed() ==
+  (
+  	dcl r: Runway := new Runway(5,5,<N>,5);
+  	dcl p1: Airplane := new Airplane(0,5,5,<N>,1,5,5);
+  	r.addPlane(p1);
+  	r.addPlane(p1);
+  
+  );
+  
+  -- Should fail
+  public testMaximumCapacity: () ==> ()
+  testMaximumCapacity() ==
+  (
+  	dcl r: Runway := new Runway(5,5,<N>,0);
+  	dcl p1: Airplane := new Airplane(0,5,5,<N>,1,5,5);
+  	r.addPlane(p1);
+  );
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end TestRunway

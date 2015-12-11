@@ -19,7 +19,9 @@ instance variables
 	private outOfReach : bool := false; -- When the plane leaves the map if it is the goal
 	private landed : bool := false;	-- Plane landed in the runway or not
 
--- Variables that will change during the code;
+-- Invariants;
+	inv curPos >= 0;
+	inv speed > 0 and targetSpeed > 0;
 	
 -- Help variable for the orientation change
 
@@ -48,8 +50,16 @@ operations
 		goal := mk_Point(gx,gy);
 		return self;
 	)
-	pre x >= 0 and x <= 40 and y >= 0 and y <= 40 and s > 0 and s <= 1;
+	pre x >= 0 and x <= 19 and y >= 0 and y <= 19 and s > 0 
+		and s <= 1 and gx >= -20 and gx <= 20 and gy >= -20 and gy <= 20;
 	
+	--Gets id of the plane
+	public getID: () ==> nat
+	getID() ==
+	(
+		return idPlane;
+	)
+	post idPlane = idPlane~;
 	--Get position x of the plane
 	public getPos: () ==> Point
 	getPos() ==
@@ -348,6 +358,7 @@ operations
 		);
 	)
 	post orientations = orientations~ and secGoal = secGoal~ and position = position~;
+	
 	-- function to calculate movement of the plane when there is a secGoal
 	private calcMovement: () ==> int
 	calcMovement () ==

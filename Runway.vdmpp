@@ -1,15 +1,85 @@
 class Runway
 types
-	public Point :: x:nat
-							y:nat;
+	public Point :: x:int
+							y:int;
 	public Orientation = <N>|<NW>|<W>|<SW>|<S>|<SE>|<E>|<NE>;
 values
 -- TODO Define values here
 instance variables
 	private position : Point;
 	private orientation : Orientation;
+	private planes : seq of Airplane;
+	private capacity : nat;
 operations
--- TODO Define operations here
+	
+	--Contructor
+	public Runway: int * int * Orientation * nat ==> Runway
+	Runway(x, y, ori, c) ==
+	(
+		position := mk_Point(x,y);
+		orientation := ori;
+		planes := [];
+		capacity := c;
+		return self;
+	)
+	pre x < 20 and x >= 0 and y < 20 and y >= 0;
+	
+	--Sets the orientation of the runway
+	public setOrientation: Orientation ==> ()
+	setOrientation(ori) ==
+	(
+		orientation := ori;
+	);
+	
+	--Gets the orientation of the runway
+	public getOrientation: () ==> Orientation
+	getOrientation() ==
+	(
+		return orientation;
+	)
+	post orientation = orientation~;
+	
+	--Returns the capacity
+	public getCapacity: () ==> nat
+	getCapacity() ==
+	(
+		return capacity;
+	)
+	post capacity = capacity~;
+	
+	--Sets the capacity if the number is bigger than or equal to the number of planes in the runway
+	public setCapacity: nat ==> ()
+	setCapacity(c) ==
+	(
+		capacity := c;
+	)
+	pre c >= len planes;
+	
+	--Returns the planes
+	public getPlanes: () ==> seq of Airplane
+	getPlanes() ==
+	(
+		return planes;
+	)
+	post planes = planes~;
+	
+	--Adds a plane to the current runway
+	public addPlane: Airplane ==> ()
+	addPlane(p) ==
+	(
+		planes := [p] ^ planes;
+	)
+	pre capacity > len planes and p not in set elems planes
+	post [p] ^ planes~ = planes;
+	
+	--Removes a plane of the current runway
+	public removePlane: Airplane ==> ()
+	removePlane(p) ==
+	(
+		let p1^[p]^p2 = planes in planes := p1^p2;
+	)
+	pre p in set elems planes;
+	
 functions
 -- TODO Define functiones here
 traces

@@ -5,7 +5,8 @@ types
 values
 -- TODO Define values here
 instance variables
-	public p : Airplane := new Airplane(0,5,5,<N>,1,20,0);
+
+	--Variable used to test move function of the plane
 	public returnInt : int := 0;
 operations
 	public TestAirplane: () ==> TestAirplane
@@ -23,16 +24,26 @@ operations
 	(
 		dcl p : Airplane := new Airplane(0,7,19,<S>,1,20,0);
 		returnInt := p.move();
+		
+		assertTrue(returnInt = 0);
 		p.setTargetRotation(90);
 		returnInt := p.move();
-		returnInt := p.move();	
+		assertTrue(returnInt = 0);
+		returnInt := p.move();
+		assertTrue(returnInt = 0);	
 		assertTrue(p.getOrientation() = <E>);
 		p.setTargetRotation(-180);
 		returnInt := p.move();	
+		assertTrue(returnInt = 0);
 		returnInt := p.move();	
+		assertTrue(returnInt = 0);
 		returnInt := p.move();	
+		assertTrue(returnInt = 0);
 		returnInt := p.move();	
+		assertTrue(returnInt = 0);
 		assertTrue(p.getOrientation() = <W>);
+		IO`print("Orientation is ");
+		IO`print(p.getOrientation());
 	);
 	
 	public testFailed: () ==> ()
@@ -41,8 +52,11 @@ operations
 		dcl p : Airplane := new Airplane(0,7,19,<S>,1,20,0);
 		p.setTargetRotation(180);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
 		assertTrue(returnInt = 4);
 	);
@@ -53,8 +67,11 @@ operations
 		dcl p : Airplane := new Airplane(0,7,19,<S>,1,20,0);
 		p.setSecGoal(3,19);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
 		assertTrue(returnInt = 3);
 	);
@@ -65,12 +82,25 @@ operations
 		dcl p : Airplane := new Airplane(0,16,19,<S>,1,20,0);
 		p.setTargetRotation(90);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
+		assertTrue(returnInt = 0);
 		returnInt := p.move();
 		assertTrue(returnInt = 1);
+		assertTrue(p.getOutOfReach());
 	);
 	
+	public testAll: () ==> ()
+	testAll() ==
+	(
+		testRotate();
+		testFailed();
+		testSecGoal();
+		testOutOfReach();
+	
+	);
 functions
 -- TODO Define functiones here
 traces
