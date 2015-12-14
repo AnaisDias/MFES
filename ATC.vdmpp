@@ -11,10 +11,17 @@ instance variables
 	private airplanes: seq of Airplane;
 	private runway: Runway;
 	private beacons: seq of Point;
-	
+	private planeIDs: seq of nat;
 	--Variable to check for warnings
 	private warnings: map nat to nat;
 	private colisions: map nat to nat;
+	
+	--Variable used to check if we lost
+		private lost: int := 0;
+		
+	--Invariant for id of planes
+	inv not exists p1, p2 in set elems airplanes &
+		p1 <> p2 and p1.idPlane = p2.idPlane;
 			
 operations
 	-- Constructor
@@ -26,6 +33,7 @@ operations
 		beacons := [];
 		warnings := {|->};
 		colisions := {|->};
+		planeIDs := [];
 	);
 	
 	
@@ -41,38 +49,42 @@ operations
 	public addPlane: Airplane ==> ()
 	addPlane(p) ==
 	(
-		IO`print("Trying to add a plane\n");
-		IO`println(len airplanes + 1);
-		IO`println(p.getPos().x);
-		IO`println(p.getPos().y);
-		IO`println(p.getOrientation());
-		IO`println(p.getSpeed());
-		IO`println(p.getGoal().x);
-		IO`println(p.getGoal().y);
-		(dcl pNew : Airplane := new Airplane((len airplanes + 1), p.getPos().x , p.getPos().y , p.getOrientation(), p.getSpeed(), p.getGoal().x, p.getGoal().y);
-		airplanes := [pNew] ^ airplanes;)
+		dcl pNew : Airplane := new Airplane(p.getID(), p.getPos().x , p.getPos().y , p.getOrientation(), p.getSpeed(), p.getGoal().x, p.getGoal().y);
+		airplanes := [pNew] ^ airplanes;
+		planeIDs := [p.getID()] ^ planeIDs;
 	)
 	post len airplanes = len airplanes~ +1;
+	
+	-- Get runway
+	public getRunway: () ==> Runway
+	getRunway() ==
+	(
+		return runway;
+	);
 	
 	-- Get plane by id
 	public getPlaneByID: nat ==> Airplane
 	getPlaneByID(id) ==
 	(
-		dcl p : Airplane := new Airplane(0, -15, -15, <N> , 1, -20, 0);
-		for i = 1 to len airplanes do
-			if (airplanes(i).getID() = id) then 
-				return airplanes(i);
-				
-		return p;
-	);
+		
+		let i in set inds planeIDs be st id = planeIDs(i) in return airplanes(i);
+		
+	)
+	pre id in set elems planeIDs;
 	
 	-- Removes an airplane
 	public removePlane: Airplane ==> ()
 	removePlane(p) ==
 	(
-		let l1^[p]^l2 = airplanes in airplanes := l1^l2;
+	
+	let i in set inds airplanes be st p = airplanes(i) 
+		in airplanes := airplanes (1,...,i-1) ^ airplanes(i+1,...,len airplanes);
+	let i in set inds planeIDs be st p.getID() = planeIDs(i) 
+		in planeIDs := planeIDs (1,...,i-1) ^ planeIDs (i+1,...,len airplanes);
+		
 	)
-	pre p in set elems airplanes;
+	pre p in set elems airplanes
+	post not exists x in set elems airplanes & x = p and len planeIDs = len planeIDs~ -1;  
 	
 	-- Adds a beacon
 	public addBeacon: Point ==> ()
@@ -80,15 +92,18 @@ operations
 	(
 		beacons := [b] ^ beacons;
 	)
+	pre not exists x in set elems beacons & x = b
 	post beacons = [b] ^ beacons~;
 	
 	-- Removes a beacon
 	public removeBeacon: Point ==> ()
 	removeBeacon(b) ==
 	(
-		let b1^[b]^b2 = beacons in beacons := b1^b2;
+		let i in set inds beacons be st b = beacons(i) 
+			in beacons := beacons (1,...,i-1) ^ beacons(i+1,...,len beacons)
 	)
-	pre b in set elems beacons;
+	pre b in set elems beacons
+	post not exists x in set elems beacons & x = b;
 	
 	-- Gets all colisions
 	public getColisions: () ==> map nat to nat
@@ -105,44 +120,40 @@ operations
 	);
 	 
 	-- Orders a plane to rotate clockwise
-	public orderRotateCW: nat * int ==> ()
-	orderRotateCW(id,r) ==
+	public orderRotateCW: Airplane * int ==> ()
+	orderRotateCW(p,r) ==
 	(
-		for p in airplanes do
-				if( p.getID() = id) then
-					p.setTargetRotation(-r);
+		let i in set inds airplanes be st p = airplanes(i) 
+			in airplanes(i).setTargetRotation(-r);
 	) 
-	pre ((r rem 45) = 0 or r = 0 ) and id in set inds airplanes;
+	pre ((r rem 45) = 0 or r = 0 ) and p in set elems airplanes;
 	
 	-- Orders a plane to rotate counterclockwise
-	public orderRotateCCW: nat * int ==> ()
-	orderRotateCCW(id,r) ==
+	public orderRotateCCW: Airplane * int ==> ()
+	orderRotateCCW(p,r) ==
 	(
-		for p in airplanes do
-				if( p.getID() = id) then
-					p.setTargetRotation(r);
+		let i in set inds airplanes be st p = airplanes(i) 
+			in airplanes(i).setTargetRotation(r);
 	)
-	pre ((r rem 45) = 0 or r = 0 ) and id in set inds airplanes;
+	pre ((r rem 45) = 0 or r = 0 ) and p in set elems airplanes;
 	
 	-- Speed a plane up or down
-	public orderSpeed: nat * real ==> ()
-	orderSpeed(id,s) ==
+	public orderSpeed: Airplane * real ==> ()
+	orderSpeed(p,s) ==
 	(
-		for p in airplanes do
-				if( p.getID() = id) then
-					p.setTargetSpeed(s);
+		let i in set inds airplanes be st p = airplanes(i) 
+			in airplanes(i).setTargetSpeed(s);
 	)
-	pre s > 0 and s <= 1.0 and id in set inds airplanes;
+	pre s > 0 and s <= 1.0 and p in set elems airplanes;
 	
 	-- Order a plane to go to a beacon
-	public orderSecGoal: nat * Point ==> ()
-	orderSecGoal(id,beacon) ==
+	public orderSecGoal: Airplane * Point ==> ()
+	orderSecGoal(p,beacon) ==
 	(
-		for p in airplanes do
-			if( p.getID() = id) then
-				p.setSecGoal(beacon.x, beacon.y);
+		let i in set inds airplanes be st p = airplanes(i) 
+			in airplanes(i).setSecGoal(beacon.x, beacon.y);
 	)
-	pre beacon in set elems beacons and id in set inds airplanes;
+	pre beacon in set elems beacons and p in set elems airplanes;
 	
 	--Checks which planes are next to each other
 	public checkWarning: () ==> ()
@@ -176,6 +187,13 @@ operations
 					);
 				);
 			);
+		);
+		
+		if(card dom warnings > 0) then
+		(
+			IO`println("WARNING: Distance between planes");
+			IO`println(warnings);
+			
 		);
 	);
 	
@@ -213,7 +231,8 @@ operations
 	landPlane(p) ==
 	(
 		runway.addPlane(p);
-	);
+	)
+	pre exists p1 in set elems airplanes & p1 = p;
 	
 	-- Moves every plane
 	public move: () ==> int
@@ -225,30 +244,34 @@ operations
 			if(not p.getLanded() and not p.getOutOfReach()) then
 			(
 				n := p.move();
-				if( n = 1) then
+				if( n = 2 or n = 3) then
 				(
-					if(p.getGoal().x = runway.getPos().x and p.getGoal().y = runway.getPos().y and p.getOrientation() = runway.getOrientation()) then
+					if(p.getGoal().x = runway.getPos().x and p.getGoal().y = runway.getPos().y and p.getOrientation() = runway.getOrientation() and p.getSpeed() < 0.3) then
 					(
 						landPlane(p);
 						p.setLanded();
 					);
 				)
 				else if( n = 4 ) then
+				(
+					lost := 1;
 					return n;
+				)
 			);
 		);
 		
 		return 0;
-	);
+	)
+	post lost <> 1;
 	
 	-- Main function
 	public main: () ==> ()
 	main() ==
 	(
 		dcl n : nat := 0;
+		
 		n := move();
 		checkColisions();
-		--if(len dom colisions <> 0) then
 		checkWarning();
 	);
 	

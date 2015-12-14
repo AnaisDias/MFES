@@ -10,6 +10,9 @@ instance variables
 	private orientation : Orientation;
 	private planes : seq of Airplane;
 	private capacity : nat;
+	
+	inv not exists p1, p2 in set elems planes &
+		p1 <> p2 and p1.idPlane = p2.idPlane;
 operations
 	
 	--Contructor
@@ -42,16 +45,14 @@ operations
 	getOrientation() ==
 	(
 		return orientation;
-	)
-	post orientation = orientation~;
+	);
 	
 	--Returns the capacity
 	public getCapacity: () ==> nat
 	getCapacity() ==
 	(
 		return capacity;
-	)
-	post capacity = capacity~;
+	);
 	
 	--Sets the capacity if the number is bigger than or equal to the number of planes in the runway
 	public setCapacity: nat ==> ()
@@ -66,8 +67,7 @@ operations
 	getPlanes() ==
 	(
 		return planes;
-	)
-	post planes = planes~;
+	);
 	
 	--Adds a plane to the current runway
 	public addPlane: Airplane ==> ()
@@ -82,9 +82,11 @@ operations
 	public removePlane: Airplane ==> ()
 	removePlane(p) ==
 	(
-		let p1^[p]^p2 = planes in planes := p1^p2;
+		let i in set inds planes be st p = planes(i) in 
+			planes := planes (1,...,i-1) ^ planes(i+1,...,len planes)
+	
 	)
-	pre p in set elems planes;
+	post not exists x in set elems planes & x = p; 
 	
 functions
 -- TODO Define functiones here

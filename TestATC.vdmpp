@@ -1,0 +1,447 @@
+class TestATC
+types
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
+operations
+	private assertTrue: bool ==> ()
+  assertTrue(cond) == return
+  pre cond;
+  
+  --Tests if a plane can be returned by getting it's id
+  public TestGetPlane: () ==> ()
+  TestGetPlane() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<N>, 10);
+  	dcl p1: Airplane := new Airplane(3,15,0,<N>,1,0,20);
+  	IO`println("\nSTARTING TEST: TestGetPlane() !\n");
+  	atc.addPlane(p1);
+  	assertTrue(atc.getPlaneByID(3).getPos().x = 15 and atc.getPlaneByID(3).getPos().y = 0);
+  	IO`println("\nENDED TEST: TestGetPlane() SUCESSFULL!\n");
+  );
+  
+  --Tests if a plane succeeds in the moves it makes
+  public TestSuccessMoves: () ==> ()
+  TestSuccessMoves() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<N>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(2,19,4,<NW>,1,-20,0);
+  	IO`println("\nENDED TEST: TestSuccessMoves() SUCESSFULL!\n");
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 1);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 18 and atc.getPlaneByID(2).getPos().y = 5);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 2);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 17 and atc.getPlaneByID(2).getPos().y = 6);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 3);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 16 and atc.getPlaneByID(2).getPos().y = 7);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 4);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 15 and atc.getPlaneByID(2).getPos().y = 8);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 5);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 14 and atc.getPlaneByID(2).getPos().y = 9);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 6);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 13 and atc.getPlaneByID(2).getPos().y = 10);
+  	IO`println("\nENDED TEST: TestSuccessMoves() SUCESSFULL!\n");	
+  );
+  
+  --Tests if a plane rotates correctly
+  public TestOrderRotate: () ==> ()
+  TestOrderRotate() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<N>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,-20,0);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getOrientation() = <N>);
+  	assertTrue(atc.getPlaneByID(2).getOrientation() = <NW>);
+  	
+  	atc.orderRotateCCW(atc.getPlaneByID(1),90);
+  	atc.orderRotateCW(atc.getPlaneByID(2),90);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getOrientation() = <NW>);
+  	assertTrue(atc.getPlaneByID(2).getOrientation() = <N>);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getOrientation() = <W>);
+  	assertTrue(atc.getPlaneByID(2).getOrientation() = <NE>);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getOrientation() = <W>);
+  	assertTrue(atc.getPlaneByID(2).getOrientation() = <NE>);
+  	
+  		IO`println("\nENDED TEST: TestOrder() SUCESSFULL!\n");
+  );
+  
+  --Tests if a plane changed the speed correctly
+  public TestOrderSpeed:() ==> ()
+  TestOrderSpeed() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<N>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,-20,0);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 1);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 18 and atc.getPlaneByID(2).getPos().y = 7);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 2);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 17 and atc.getPlaneByID(2).getPos().y = 8);
+  	
+  	assertTrue(atc.getPlaneByID(1).getSpeed() = 1);
+  	assertTrue(atc.getPlaneByID(2).getSpeed() = 1);
+  	
+  	atc.orderSpeed(atc.getPlaneByID(1),0.7);
+  	atc.orderSpeed(atc.getPlaneByID(2),0.4);
+  	
+  	assertTrue(atc.getPlaneByID(1).getSpeed() = 1);
+  	assertTrue(atc.getPlaneByID(2).getSpeed() = 1);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 2);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 17 and atc.getPlaneByID(2).getPos().y = 8);
+  	
+  	assertTrue(atc.getPlaneByID(1).getSpeed() < 0.9 and atc.getPlaneByID(1).getSpeed() > 0.7);
+  	assertTrue(atc.getPlaneByID(2).getSpeed() < 0.9 and atc.getPlaneByID(2).getSpeed() > 0.7);
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 3);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 16 and atc.getPlaneByID(2).getPos().y = 9);
+  	
+  	assertTrue(atc.getPlaneByID(1).getSpeed() < 0.8 and atc.getPlaneByID(1).getSpeed() > 0.6);
+  	assertTrue(atc.getPlaneByID(2).getSpeed() < 0.7 and atc.getPlaneByID(2).getSpeed() > 0.5);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 4);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 16 and atc.getPlaneByID(2).getPos().y = 9);
+  	
+  	assertTrue(atc.getPlaneByID(1).getSpeed() < 0.8 and atc.getPlaneByID(1).getSpeed() > 0.6);
+  	assertTrue(atc.getPlaneByID(2).getSpeed() < 0.5 and atc.getPlaneByID(2).getSpeed() > 0.3);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 4);
+  	assertTrue(atc.getPlaneByID(2).getPos().x = 15 and atc.getPlaneByID(2).getPos().y = 10);
+  	
+  	assertTrue(atc.getPlaneByID(1).getSpeed() < 0.8 and atc.getPlaneByID(1).getSpeed() > 0.6);
+  	assertTrue(atc.getPlaneByID(2).getSpeed() < 0.5 and atc.getPlaneByID(2).getSpeed() > 0.3);
+  );
+  
+  --Tests if a plane moved to a beacon it was ordered to move
+  public TestOrderSecGoal: () ==> ()
+  TestOrderSecGoal() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<W>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,-20,0);
+  	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,0,20);
+  	dcl b1: ATC`Point := mk_ATC`Point(5,5);
+  	dcl b2: ATC`Point := mk_ATC`Point(10,10);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	atc.addBeacon(b1);
+  	atc.addBeacon(b2);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	atc.orderSecGoal(atc.getPlaneByID(1),b1);
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(15,1));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(14,2));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(13,3));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(12,4));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(11,5));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(10,5));
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(9,5));
+  	IO`println("\nMoving...");
+  	atc.main();  
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(8,5));	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(7,5));	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(6,5));	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(5,5));
+  	atc.orderSecGoal(atc.getPlaneByID(1),b2);
+  	assertTrue(atc.getPlaneByID(1).getSecGoal() = mk_Airplane`Point(10,10));
+  	
+  );
+  
+  --Tests if a plane landed correctly
+  public TestLanded: () ==> ()
+  TestLanded() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<W>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,5,5);
+  	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,0,20);
+  	dcl b1: ATC`Point := mk_ATC`Point(5,5);
+  	dcl b2: ATC`Point := mk_ATC`Point(10,10);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	atc.addBeacon(b1);
+  	atc.addBeacon(b2);
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	atc.orderSecGoal(atc.getPlaneByID(1),b1);
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(15,1));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(14,2));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(13,3));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(12,4));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(11,5));
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(10,5));
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(9,5));
+  	IO`println("\nMoving...");
+  	atc.main();  
+  	
+  	atc.orderSpeed(atc.getPlaneByID(1),0.8);
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(8,5));	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	atc.orderSpeed(atc.getPlaneByID(1),0.2);
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	IO`println("\nMoving...");
+  	atc.main();  	
+  	
+  	
+  	IO`println("\nMoving...");
+  	atc.main();
+  	
+  	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(5,5));
+  	assertTrue(atc.getPlaneByID(1).getLanded());
+  	assertTrue(len atc.getRunway().getPlanes() = 1);
+  
+  );
+  --Should fail on the last check
+  public TestColisions: () ==> ()
+  TestColisions() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<W>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(2,19,4,<W>,1,-20,0);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	
+  	atc.main();
+  	atc.main();
+  	atc.main();
+  	IO`println("Should fail after this statement!");
+  	atc.main();
+  );
+  
+  
+  public TestWarnings: () ==> ()
+  TestWarnings() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<N>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(2,19,4,<W>,1,-20,0);
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	atc.main();
+  	assertTrue(card rng atc.getWarnings() = 0);
+  	atc.main();
+  	assertTrue(card rng atc.getWarnings() = 0);
+  	atc.main();
+  	assertTrue(card rng atc.getWarnings() = 1);
+  	
+  	IO`println("Warnings:");
+ 		IO`println(atc.getWarnings());
+ 		assertTrue(card rng atc.getWarnings() = 1);
+ 		
+ 		IO`println("\nOrder rotation 90º CCW");
+ 		atc.orderRotateCCW(atc.getPlaneByID(2),90);
+ 		
+ 		IO`println("\nMoving...");
+ 		atc.main();
+ 		
+ 		IO`println("\nFirst plane position:");
+ 		IO`println(atc.getPlaneByID(1).getPos());
+ 		
+ 		IO`println("\nSecond plane position:");
+ 		IO`println(atc.getPlaneByID(2).getPos());
+ 		
+ 		IO`println("\nWarnings:");
+ 		IO`println(atc.getWarnings());
+ 		assertTrue(card rng atc.getWarnings() = 1);
+ 		
+ 		IO`println("\nMoving...");
+ 		atc.main();
+ 		
+ 		IO`println("\nFirst plane position:");
+ 		IO`println(atc.getPlaneByID(1).getPos());
+ 		
+ 		IO`println("\nSecond plane position:");
+ 		IO`println(atc.getPlaneByID(2).getPos());
+ 		
+ 		IO`println("\nWarnings:");
+ 		IO`println(atc.getWarnings());
+ 		
+ 		assertTrue(card rng atc.getWarnings() = 0);
+ 		
+  );
+  
+  --Should fail
+  public TestLoseGame: () ==> ()
+  TestLoseGame() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<W>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(2,19,19,<NE>,1,-20,0);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	
+  	atc.main();
+  	
+  );
+  
+  --Should fail because it breaks the invariant of atc
+  public TestInv1: () ==> ()
+  TestInv1() ==
+  (
+  	dcl atc: ATC := new ATC(5,5,<W>, 10);
+  	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
+  	dcl p2: Airplane := new Airplane(1,19,19,<NE>,1,-20,0);
+  	
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  );
+  
+   --Should fail because it breaks the pre condition of the function. 
+   --Should also fail if there wasn't a precondition because of the invariant of runway
+  public TestFailLanded: () ==> ()
+  TestFailLanded() ==
+  (
+  	dcl atc: ATC := new ATC(19,0,<N>, 10);
+  	dcl p1: Airplane := new Airplane(1,19,0,<N>,0.1,19,0);
+  	dcl p2: Airplane := new Airplane(1,19,0,<N>,0.1,19,0);
+  	
+  	atc.addPlane(p1);
+  	atc.landPlane(p1);
+  	atc.landPlane(p2);
+  );
+  
+  --Tests all that succeed
+  public TestAll: () ==> ()
+  TestAll() ==
+  (
+  	TestGetPlane();
+  	TestSuccessMoves();
+  	TestOrderRotate();
+  	TestOrderSpeed();
+  	TestOrderSecGoal();
+  	TestLanded();
+  	TestWarnings();
+  );
+  
+  
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end TestATC
