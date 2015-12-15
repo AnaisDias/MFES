@@ -27,13 +27,6 @@ operations
 	)
 	pre x < 20 and x >= 0 and y < 20 and y >= 0;
 	
-	--Sets the orientation of the runway
-	public setOrientation: Orientation ==> ()
-	setOrientation(ori) ==
-	(
-		orientation := ori;
-	);
-	
 	--Gets position
 	public getPos: () ==> Point
 	getPos() ==
@@ -54,14 +47,6 @@ operations
 		return capacity;
 	);
 	
-	--Sets the capacity if the number is bigger than or equal to the number of planes in the runway
-	public setCapacity: nat ==> ()
-	setCapacity(c) ==
-	(
-		capacity := c;
-	)
-	pre c >= len planes;
-	
 	--Returns the planes
 	public getPlanes: () ==> seq of Airplane
 	getPlanes() ==
@@ -78,15 +63,6 @@ operations
 	pre capacity > len planes and p not in set elems planes
 	post [p] ^ planes~ = planes;
 	
-	--Removes a plane of the current runway
-	public removePlane: Airplane ==> ()
-	removePlane(p) ==
-	(
-		let i in set inds planes be st p = planes(i) in 
-			planes := planes (1,...,i-1) ^ planes(i+1,...,len planes)
-	
-	)
-	post not exists x in set elems planes & x = p; 
 	
 functions
 -- TODO Define functiones here

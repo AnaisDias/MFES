@@ -30,20 +30,18 @@ operations
 	(
 		airplanes := [];
 		runway := new Runway(rx, ry, rori, c);
-		beacons := [];
+		beacons := [mk_Point(-1,-1)];
 		warnings := {|->};
 		colisions := {|->};
 		planeIDs := [];
 	);
 	
-	
-	-- Gets all planes
+	-- Gets the seq of Airplane
 	public getPlanes: () ==> seq of Airplane
 	getPlanes() ==
 	(
 		return airplanes;
-	)
-	post airplanes = airplanes~;
+	);
 	
 	-- Adds an airplane
 	public addPlane: Airplane ==> ()
@@ -76,15 +74,25 @@ operations
 	public removePlane: Airplane ==> ()
 	removePlane(p) ==
 	(
-	
 	let i in set inds airplanes be st p = airplanes(i) 
 		in airplanes := airplanes (1,...,i-1) ^ airplanes(i+1,...,len airplanes);
 	let i in set inds planeIDs be st p.getID() = planeIDs(i) 
-		in planeIDs := planeIDs (1,...,i-1) ^ planeIDs (i+1,...,len airplanes);
+		in planeIDs := planeIDs (1,...,i-1) ^ planeIDs (i+1,...,len planeIDs);
+		
 		
 	)
 	pre p in set elems airplanes
-	post not exists x in set elems airplanes & x = p and len planeIDs = len planeIDs~ -1;  
+	post (not exists x in set elems airplanes & x = p) and len planeIDs = len planeIDs~ -1;  
+	
+	-- Removes a plane after it goes OutOfReach
+	public removeOutOfReach: () ==> ()
+	removeOutOfReach() ==
+	(
+			for all p in set elems airplanes do
+			(
+				if(p.getOutOfReach()) then removePlane(p);
+			);
+	);
 	
 	-- Adds a beacon
 	public addBeacon: Point ==> ()
@@ -94,16 +102,6 @@ operations
 	)
 	pre not exists x in set elems beacons & x = b
 	post beacons = [b] ^ beacons~;
-	
-	-- Removes a beacon
-	public removeBeacon: Point ==> ()
-	removeBeacon(b) ==
-	(
-		let i in set inds beacons be st b = beacons(i) 
-			in beacons := beacons (1,...,i-1) ^ beacons(i+1,...,len beacons)
-	)
-	pre b in set elems beacons
-	post not exists x in set elems beacons & x = b;
 	
 	-- Gets all colisions
 	public getColisions: () ==> map nat to nat
@@ -126,7 +124,7 @@ operations
 		let i in set inds airplanes be st p = airplanes(i) 
 			in airplanes(i).setTargetRotation(-r);
 	) 
-	pre ((r rem 45) = 0 or r = 0 ) and p in set elems airplanes;
+	pre (r rem 45) = 0 and p in set elems airplanes;
 	
 	-- Orders a plane to rotate counterclockwise
 	public orderRotateCCW: Airplane * int ==> ()
@@ -135,7 +133,7 @@ operations
 		let i in set inds airplanes be st p = airplanes(i) 
 			in airplanes(i).setTargetRotation(r);
 	)
-	pre ((r rem 45) = 0 or r = 0 ) and p in set elems airplanes;
+	pre (r rem 45) = 0 and p in set elems airplanes;
 	
 	-- Speed a plane up or down
 	public orderSpeed: Airplane * real ==> ()
@@ -144,7 +142,7 @@ operations
 		let i in set inds airplanes be st p = airplanes(i) 
 			in airplanes(i).setTargetSpeed(s);
 	)
-	pre s > 0 and s <= 1.0 and p in set elems airplanes;
+	pre s >= 0.1 and s <= 1.0 and p in set elems airplanes;
 	
 	-- Order a plane to go to a beacon
 	public orderSecGoal: Airplane * Point ==> ()
@@ -156,6 +154,7 @@ operations
 	pre beacon in set elems beacons and p in set elems airplanes;
 	
 	--Checks which planes are next to each other
+	-- If there are no warnings there is no coverage inside the second third
 	public checkWarning: () ==> ()
 	checkWarning() ==
 	(
@@ -164,7 +163,7 @@ operations
 		(
 			if(not p1.getLanded() and not p1.getOutOfReach()) then
 			(
-				for p2 in airplanes do
+				for all p2 in set elems airplanes do
 				(
 					if(p1 <> p2 and ({p2.getID()} <: warnings) <> {p2.getID() |-> p1.getID()}
 						and not p2.getLanded() and not p2.getOutOfReach()) then
@@ -198,6 +197,7 @@ operations
 	);
 	
 	-- Checks for colisions
+	-- If there are no colisions there is no coverage inside the second third
 	public checkColisions: () ==> ()
 	checkColisions() ==
 	(
@@ -205,7 +205,7 @@ operations
 		(
 			if(not p1.getLanded() and not p1.getOutOfReach()) then
 			(
-				for p2 in airplanes do
+				for all p2 in set elems airplanes do
 				(
 					if( p1 <> p2 and not p2.getLanded() and not p2.getOutOfReach()
 						and ({p2.getID()} <: colisions) <> {p2.getID() |-> p1.getID()} ) then
@@ -230,16 +230,18 @@ operations
 	public landPlane: Airplane ==> ()
 	landPlane(p) ==
 	(
+		p.setLanded();
 		runway.addPlane(p);
 	)
-	pre exists p1 in set elems airplanes & p1 = p;
+	pre exists p1 in set elems airplanes & p = p1;
 	
 	-- Moves every plane
+	-- Full coverage is achieved only when the game is lost
 	public move: () ==> int
 	move() ==
 	(
 		dcl n : nat := 0;
-		for p in airplanes do
+		for all p in set elems airplanes do
 		(
 			if(not p.getLanded() and not p.getOutOfReach()) then
 			(
@@ -249,7 +251,6 @@ operations
 					if(p.getGoal().x = runway.getPos().x and p.getGoal().y = runway.getPos().y and p.getOrientation() = runway.getOrientation() and p.getSpeed() < 0.3) then
 					(
 						landPlane(p);
-						p.setLanded();
 					);
 				)
 				else if( n = 4 ) then
@@ -264,6 +265,73 @@ operations
 	)
 	post lost <> 1;
 	
+	-- Checks if a airplane exists in a position
+	-- Used when printBoard is used
+	-- Full coverage if there is a plane
+	private existsPlanePos: nat * nat ==> bool
+	existsPlanePos(x,y) ==
+	(
+		for all p in set elems airplanes do
+		(
+			if(p.getPos() = mk_Airplane`Point(x,y)) then
+				return true;
+		);
+		return false;
+	)
+	pre x >= 0 and x < 20 and y >= 0 and y < 20;
+	
+	-- Checks if a beacon exists in a position
+	-- Used when printBoard is used
+	-- Full coverage if there is a beacon
+	private existsBeaconPos: nat * nat ==> bool
+	existsBeaconPos(x,y) ==
+	(
+		for all b in set elems beacons do
+		(
+			if(b = mk_Point(x,y)) then
+				return true;
+		);
+		return false;
+	)
+	pre x >= 0 and x < 20 and y >= 0 and y < 20;
+	
+	-- Function to print the current board;
+	public printSpace: () ==> ()
+	printSpace() == 
+	(
+		IO`print("y|x, 0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,");  
+		for i = 0 to 19 do
+		(
+			IO`print("\n ");
+			IO`print(i);
+			if( i < 10) then IO`print(" ");
+			
+			for j = 0 to 19 do
+			(
+				if(runway.getPos() = mk_Runway`Point(i,j)) then
+				(
+					
+					IO`print(", R ");
+					if(j = 19) then IO`print(",");
+				)
+				else if(existsPlanePos(i,j)) then
+				(
+					IO`print(", A ");
+					if(j = 19) then IO`print(",");
+				)
+				else if(existsBeaconPos(i,j)) then
+				(
+					IO`print(", B ");
+					if(j = 19) then IO`print(",");
+				)
+				else
+				( 
+					IO`print(",   ");
+					if(j = 19) then IO`print(",");		
+				)
+			);
+		);
+	);
 	-- Main function
 	public main: () ==> ()
 	main() ==
@@ -273,6 +341,7 @@ operations
 		n := move();
 		checkColisions();
 		checkWarning();
+		removeOutOfReach();
 	);
 	
 	

@@ -14,14 +14,14 @@ instance variables
 	private curPos : real := 0; -- 0 to 1. This is incremented by the speed each clock tick
 	private speed : real; -- 0.1 to 1.0 . Speed of the plane.
 	private targetSpeed : real;
-	private goal : Point; -- Current primary goal of the plane.
+	private goal : Point := mk_Point(-1,-1); -- Current primary goal of the plane.
 	private secGoal : Point := mk_Point(-1,-1); -- Current secGoal of the plane or a beacon. 
 	private outOfReach : bool := false; -- When the plane leaves the map if it is the goal
 	private landed : bool := false;	-- Plane landed in the runway or not
 
 -- Invariants;
 	inv curPos >= 0;
-	inv speed > 0 and targetSpeed > 0;
+	inv speed >= 0.1 and speed <= 1 and targetSpeed >= 0.1 and targetSpeed <= 1;
 	
 -- Help variable for the orientation change
 
@@ -47,7 +47,7 @@ operations
 		targetSpeed := s;
 		orientation := ori;
 		idPlane := id;
-		goal := mk_Point(gx,gy);
+		setGoal(gx,gy);
 		return self;
 	)
 	pre ( (x = 0 or x = 19) and y >= 0 and y <= 19) or (x >= 0 and x <= 19 and (y = 0 or y = 19) ) and s > 0 
@@ -79,7 +79,8 @@ operations
 	(
 			goal := mk_Point(x,y);
 	)
-	pre x >= -20 and x <= 20 and y >= -20 and y <= 20;
+	pre x >= -20 and x <= 20 and y >= -20 and y <= 20
+	post goal = mk_Point(x,y);
 	
 	--Get Goal
 	public getGoal: () ==> Point
@@ -94,7 +95,8 @@ operations
 	(
 			secGoal := mk_Point(x,y);
 	)
-	pre x >= -1 and x < 20 and y >= -1 and y < 20;
+	pre (x > -1 and x < 20 and y > -1 and y < 20) or (x = -1 and y = -1)
+	post secGoal = mk_Point(x,y);
 	
 	--Get secGoal
 	public getSecGoal: () ==> Point
@@ -141,6 +143,7 @@ operations
 	);
 	
 	--Convert angle  to Orientation
+	-- Full converage is achieved only if all orientations are used in the airplanes
 	private convertAngle: int ==> Orientation
 	convertAngle(ang) ==
 	(
@@ -179,28 +182,28 @@ operations
 	(
 		if( speed < targetSpeed) then
 		(
-			if(abs (speed - targetSpeed) >= 0.2) then
+			if(abs (speed - targetSpeed) > 0.2) then
 			(
 				speed := speed + 0.2;
 			)
 			else
 			(
-				speed := speed + 0.1;
+				speed := targetSpeed;
 			);
 		)
 		else if(speed > targetSpeed) then
 		(
-			if(abs (speed - targetSpeed) >= 0.2) then
+			if(abs (speed - targetSpeed) > 0.2) then
 			(
 				speed := speed - 0.2;
 			)
 			else
 			(
-				speed := speed - 0.1;
+				speed := targetSpeed;
 			);
 		);	
-	);
-		
+	)post (targetSpeed~ <> speed~ and speed <> speed~) or (targetSpeed~ = speed~ and speed = speed~);
+	
 	-- rotates the plane acording to the target orientation
 	private setOrientation: () ==> ()
 	setOrientation() ==
@@ -216,7 +219,7 @@ operations
 			orientation := convertAngle(getAngle()-45);
 			targetRotation := targetRotation + 45;
 		)
-	);
+	)post ((targetRotation~ > 0 or targetRotation~ < 0) and orientation <> orientation~) or (targetRotation~ = 0 and orientation = orientation~);
 	
 	-- function used in move to calculate which orientation must the plane have to reach the goal
 	private calcOrientation: () ==> ()
@@ -346,6 +349,7 @@ operations
 	post orientations = orientations~ and secGoal = secGoal~ and position = position~;
 	
 	-- function to calculate movement of the plane when there is a secGoal
+	-- full coverage would be achieved if planes went to beacons through all orientations and all outcomes
 	private calcMovement: () ==> int
 	calcMovement () ==
 	(
@@ -587,7 +591,7 @@ operations
 						-- BEACON <N>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.y > 19) then (
@@ -615,7 +619,7 @@ operations
 						-- BEACON <NE>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.y > 19 or position.x > 19) then (
@@ -641,7 +645,7 @@ operations
 						-- BEACON <E>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.x > 19) then (
@@ -669,7 +673,7 @@ operations
 						-- BEACON <SE>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.y < 0 or position.x > 19) then (
@@ -695,7 +699,7 @@ operations
 						-- BEACON <S>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.y < 0) then (
@@ -723,7 +727,7 @@ operations
 						-- BEACON <SW>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.y < 0 or position.x < 0) then (
@@ -750,7 +754,7 @@ operations
 						-- BEACON <W>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.x < 0) then (
@@ -777,7 +781,7 @@ operations
 						-- BEACON <NW>
 						else if (position.x = secGoal.x and position.y = secGoal.y) then
 						(
-							secGoal := mk_Point(-1,-1);
+							setSecGoal(-1,-1);
 							return BEACON;
 						)
 						else if (position.y > 19 or position.x < 0) then (

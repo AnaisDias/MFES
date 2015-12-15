@@ -28,39 +28,56 @@ operations
   	dcl atc: ATC := new ATC(5,5,<N>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(2,19,4,<NW>,1,-20,0);
-  	IO`println("\nENDED TEST: TestSuccessMoves() SUCESSFULL!\n");
+  	dcl p3: Airplane := new Airplane(3,5,19,<N>,0.5,0,20);
+  	
+  	assertTrue(atc.getRunway().getCapacity() = 10);
+  	
+  	IO`println("\nSTARTING TEST: TestSuccessMoves()!\n");
   	atc.addPlane(p1);
   	atc.addPlane(p2);
+  	atc.addPlane(p3);
   	
+  	atc.printSpace();
   	IO`println("\nMoving...");
   	atc.main();
+  	atc.printSpace();
+  	assertTrue(len atc.getPlanes() = 3);
   	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 1);
   	assertTrue(atc.getPlaneByID(2).getPos().x = 18 and atc.getPlaneByID(2).getPos().y = 5);
+  	assertTrue(atc.getPlaneByID(3).getPos().x = 5 and atc.getPlaneByID(3).getPos().y = 19);
   	
   	IO`println("\nMoving...");
   	atc.main();
+  	atc.printSpace();
+  	
+  	assertTrue(len atc.getPlanes() = 2);
   	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 2);
   	assertTrue(atc.getPlaneByID(2).getPos().x = 17 and atc.getPlaneByID(2).getPos().y = 6);
   	
   	IO`println("\nMoving...");
   	atc.main();
+  	atc.printSpace();
   	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 3);
   	assertTrue(atc.getPlaneByID(2).getPos().x = 16 and atc.getPlaneByID(2).getPos().y = 7);
   	
   	IO`println("\nMoving...");
   	atc.main();
+  	atc.printSpace();
   	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 4);
   	assertTrue(atc.getPlaneByID(2).getPos().x = 15 and atc.getPlaneByID(2).getPos().y = 8);
   	
   	IO`println("\nMoving...");
   	atc.main();
+  	atc.printSpace();
   	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 5);
   	assertTrue(atc.getPlaneByID(2).getPos().x = 14 and atc.getPlaneByID(2).getPos().y = 9);
   	
   	IO`println("\nMoving...");
-  	atc.main();  	
+  	atc.main(); 
+  	atc.printSpace();
   	assertTrue(atc.getPlaneByID(1).getPos().x = 15 and atc.getPlaneByID(1).getPos().y = 6);
   	assertTrue(atc.getPlaneByID(2).getPos().x = 13 and atc.getPlaneByID(2).getPos().y = 10);
+  	
   	IO`println("\nENDED TEST: TestSuccessMoves() SUCESSFULL!\n");	
   );
   
@@ -72,17 +89,24 @@ operations
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,-20,0);
   	
+  	assertTrue(atc.getRunway().getCapacity() = 10);
+  	
+  	IO`println("\nSTARTING TEST: TestOrderRotate() !\n");
+  	
   	atc.addPlane(p1);
   	atc.addPlane(p2);
   	
+  	
   	IO`println("\nMoving...");
   	atc.main();
-  	
+  	atc.orderRotateCCW(atc.getPlaneByID(1),0);
+  	atc.orderRotateCW(atc.getPlaneByID(2),0);
   	IO`println("\nMoving...");
   	atc.main();
   	
   	assertTrue(atc.getPlaneByID(1).getOrientation() = <N>);
   	assertTrue(atc.getPlaneByID(2).getOrientation() = <NW>);
+  	
   	
   	atc.orderRotateCCW(atc.getPlaneByID(1),90);
   	atc.orderRotateCW(atc.getPlaneByID(2),90);
@@ -105,6 +129,7 @@ operations
   	assertTrue(atc.getPlaneByID(1).getOrientation() = <W>);
   	assertTrue(atc.getPlaneByID(2).getOrientation() = <NE>);
   	
+  	
   		IO`println("\nENDED TEST: TestOrder() SUCESSFULL!\n");
   );
   
@@ -115,9 +140,14 @@ operations
   	dcl atc: ATC := new ATC(5,5,<N>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,-20,0);
+  	dcl p3: Airplane := new Airplane(3,5,19,<S>,0.4,0,20);
+  	
+  	IO`println("\nSTARTING TEST: TestOrderSpeed() !\n");
   	
   	atc.addPlane(p1);
   	atc.addPlane(p2);
+  	atc.addPlane(p3);
+  	assertTrue(atc.getRunway().getCapacity() = 10);
   	
   	IO`println("\nMoving...");
   	atc.main();
@@ -136,6 +166,7 @@ operations
   	
   	atc.orderSpeed(atc.getPlaneByID(1),0.7);
   	atc.orderSpeed(atc.getPlaneByID(2),0.4);
+  	atc.orderSpeed(atc.getPlaneByID(3),1);
   	
   	assertTrue(atc.getPlaneByID(1).getSpeed() = 1);
   	assertTrue(atc.getPlaneByID(2).getSpeed() = 1);
@@ -174,6 +205,9 @@ operations
   	
   	assertTrue(atc.getPlaneByID(1).getSpeed() < 0.8 and atc.getPlaneByID(1).getSpeed() > 0.6);
   	assertTrue(atc.getPlaneByID(2).getSpeed() < 0.5 and atc.getPlaneByID(2).getSpeed() > 0.3);
+  	assertTrue(atc.getPlaneByID(3).getSpeed() = 1);
+  	
+  	IO`println("\nENDED TEST: TestOrderSpeed() SUCESSFULL!\n");
   );
   
   --Tests if a plane moved to a beacon it was ordered to move
@@ -183,18 +217,30 @@ operations
   	dcl atc: ATC := new ATC(5,5,<W>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,-20,0);
   	dcl p2: Airplane := new Airplane(2,19,6,<NW>,1,0,20);
+  	dcl p3: Airplane := new Airplane(3,0,2,<E>,1,0,-20);
   	dcl b1: ATC`Point := mk_ATC`Point(5,5);
   	dcl b2: ATC`Point := mk_ATC`Point(10,10);
+  	dcl b3: ATC`Point := mk_ATC`Point(5,7);
+  	dcl b4: ATC`Point := mk_ATC`Point(6,7);
+  	dcl b5: ATC`Point := mk_ATC`Point(6,11);
+  	
+  	IO`println("\nSTARTING TEST: TestOrderSecGoal() !\n");
   	
   	atc.addPlane(p1);
   	atc.addPlane(p2);
+  	atc.addPlane(p3);
   	atc.addBeacon(b1);
   	atc.addBeacon(b2);
+  	atc.addBeacon(b3);
+  	atc.addBeacon(b4);
+  	atc.addBeacon(b5);
+  	
   	
   	IO`println("\nMoving...");
   	atc.main();
   	
   	atc.orderSecGoal(atc.getPlaneByID(1),b1);
+  	atc.orderSecGoal(atc.getPlaneByID(3),b1);
   	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(15,1));
   	IO`println("\nMoving...");
   	atc.main();
@@ -214,7 +260,7 @@ operations
   	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(11,5));
   	IO`println("\nMoving...");
   	atc.main();
-  	
+  	atc.orderSecGoal(atc.getPlaneByID(3),b3);
   	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(10,5));
   	IO`println("\nMoving...");
   	atc.main();  	
@@ -226,7 +272,7 @@ operations
   	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(8,5));	
   	IO`println("\nMoving...");
   	atc.main();  	
-
+		atc.orderSecGoal(atc.getPlaneByID(3),b5);
   	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(7,5));	
   	IO`println("\nMoving...");
   	atc.main();  	
@@ -239,8 +285,21 @@ operations
   	atc.orderSecGoal(atc.getPlaneByID(1),b2);
   	assertTrue(atc.getPlaneByID(1).getSecGoal() = mk_Airplane`Point(10,10));
   	
+  	IO`println("\nENDED TEST: TestSecGoal() SUCESSFULL!\n");
   );
   
+  public TestLanded1: () ==> ()
+  TestLanded1() ==
+  (
+ 		dcl atc: ATC := new ATC(0,19,<W>, 10);
+  	dcl p1: Airplane := new Airplane(1,0,19,<W>,0.1,0,19);
+  	dcl p2: Airplane := new Airplane(2,0,19,<W>,0.1,0,19);
+  	atc.addPlane(p1);
+  	atc.addPlane(p2);
+  	atc.landPlane(atc.getPlaneByID(1));
+  	atc.landPlane(atc.getPlaneByID(2));
+  	assertTrue(len atc.getRunway().getPlanes() = 2);
+  );
   --Tests if a plane landed correctly
   public TestLanded: () ==> ()
   TestLanded() ==
@@ -251,10 +310,13 @@ operations
   	dcl b1: ATC`Point := mk_ATC`Point(5,5);
   	dcl b2: ATC`Point := mk_ATC`Point(10,10);
   	
+  	IO`println("\nSTARTING TEST: TestLanded() !\n");
+  	
   	atc.addPlane(p1);
   	atc.addPlane(p2);
   	atc.addBeacon(b1);
   	atc.addBeacon(b2);
+  	
   	
   	IO`println("\nMoving...");
   	atc.main();
@@ -313,8 +375,11 @@ operations
   	assertTrue(atc.getPlaneByID(1).getPos() = mk_Airplane`Point(5,5));
   	assertTrue(atc.getPlaneByID(1).getLanded());
   	assertTrue(len atc.getRunway().getPlanes() = 1);
-  
+  	
+  	
+  	IO`println("\nENDED TEST: TestLanded() SUCESSFULL!\n");
   );
+  
   --Should fail on the last check
   public TestColisions: () ==> ()
   TestColisions() ==
@@ -322,6 +387,8 @@ operations
   	dcl atc: ATC := new ATC(5,5,<W>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(2,19,4,<W>,1,-20,0);
+  	
+  	IO`println("\nSTARTING TEST: TestColisions()\n\n Should fail!\n");
   	
   	atc.addPlane(p1);
   	atc.addPlane(p2);
@@ -333,15 +400,21 @@ operations
   	atc.main();
   );
   
-  
+  --Testa se existem warnings quando dois aviões estão próximos um do outro
   public TestWarnings: () ==> ()
   TestWarnings() ==
   (
   	dcl atc: ATC := new ATC(5,5,<N>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(2,19,4,<W>,1,-20,0);
+  	
+  	IO`println("\nSTARTING TEST: TestWarnings() !\n");
+  	
   	atc.addPlane(p1);
   	atc.addPlane(p2);
+  	
+  	
+  	
   	atc.main();
   	assertTrue(card rng atc.getWarnings() = 0);
   	atc.main();
@@ -383,16 +456,18 @@ operations
  		
  		assertTrue(card rng atc.getWarnings() = 0);
  		
+ 	
+ 		IO`println("\nENDED TEST: TestWarnings() SUCESSFULL!\n");	
   );
   
-  --Should fail
+  --Should fail because plane went out of reach through the side that is not it's goal
   public TestLoseGame: () ==> ()
   TestLoseGame() ==
   (
   	dcl atc: ATC := new ATC(5,5,<W>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(2,19,19,<NE>,1,-20,0);
-  	
+  	IO`println("\nSTARTING TEST: TestLoseGame() !\n");
   	atc.addPlane(p1);
   	atc.addPlane(p2);
   	
@@ -407,7 +482,7 @@ operations
   	dcl atc: ATC := new ATC(5,5,<W>, 10);
   	dcl p1: Airplane := new Airplane(1,15,0,<N>,1,0,20);
   	dcl p2: Airplane := new Airplane(1,19,19,<NE>,1,-20,0);
-  	
+  	IO`println("\nSTARTING TEST: TestInv1() !\n");
   	atc.addPlane(p1);
   	atc.addPlane(p2);
   );
@@ -420,7 +495,7 @@ operations
   	dcl atc: ATC := new ATC(19,0,<N>, 10);
   	dcl p1: Airplane := new Airplane(1,19,0,<N>,0.1,19,0);
   	dcl p2: Airplane := new Airplane(1,19,0,<N>,0.1,19,0);
-  	
+  	IO`println("\nSTARTING TEST: TestFailLanded() !\n");
   	atc.addPlane(p1);
   	atc.landPlane(p1);
   	atc.landPlane(p2);
@@ -430,13 +505,17 @@ operations
   public TestAll: () ==> ()
   TestAll() ==
   (
+  	IO`println("\nSTARTING TEST: TestAll() !\n");
   	TestGetPlane();
   	TestSuccessMoves();
   	TestOrderRotate();
   	TestOrderSpeed();
   	TestOrderSecGoal();
+  	TestLanded1();
   	TestLanded();
   	TestWarnings();
+  	
+  	IO`println("\nENDED TEST: TestAll() SUCESSFULL!\n");
   );
   
   
